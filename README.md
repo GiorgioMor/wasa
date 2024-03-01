@@ -92,15 +92,15 @@ You can build and run the project with Docker
 
 * Backend
 	```shell
-		docker build -t homework-backend:latest -f Dockerfile.backend .
-		docker run -it -p 3000:3000 --rm homework-backend:latest
+	docker build -t homework-backend:latest -f Dockerfile.backend .
+	docker run -it -p 3000:3000 --rm homework-backend:latest
 	```
 
 * Frontend
-	```shell
- 		docker build -t homework-frontend:latest -f Dockerfile.frontend .
- 		docker run -it -p 8080:80 --rm homework-frontend:latest
-	```
+```shell
+ docker build -t homework-frontend:latest -f Dockerfile.frontend .
+ docker run -it -p 8080:80 --rm homework-frontend:latest
+```
 
 ## License
 
