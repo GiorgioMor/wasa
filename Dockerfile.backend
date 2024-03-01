@@ -1,0 +1,13 @@
+# docker build -t homework-backend:latest -f Dockerfile.backend .
+# docker run -it -p 3000:3000 --rm homework-backend:latest
+# I save data (DB and images) in /tmp so i don't care about persistencing data so i don't need a volume (in case a need one i use the flag -v)
+FROM golang:1.19.4 as builder
+WORKDIR /src/
+COPY . .
+RUN go build -o /app/webapi ./cmd/webapi/
+
+FROM debian:stable
+EXPOSE 3000
+WORKDIR /app/
+COPY --from=builder /app/webapi ./
+CMD ["/app/webapi"]

@@ -1,0 +1,661 @@
+openapi: 3.0.3
+info:
+  title: API specification Homework 1 WASA
+  description: |-
+    This OpenAPI document describes the WASA Homework 1 API.
+  version: "1.0.0"
+servers:
+  - url: http://localhost:3000
+tags:
+  - name: login
+  - name: User
+  - name: Follow
+  - name: Ban
+  - name: Photo
+paths:
+  /session:
+    post:
+      tags: ["login"]
+      summary: Logs in the user
+      description: |-
+        If the user does not exist, it will be created,
+        and an identifier is returned.
+        If the user exists, the user identifier is returned.
+      operationId: doLogin
+      requestBody:
+        description: User details
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Username" }
+        required: true
+      responses:
+        '201':
+          description: |-
+            User log-in action successful
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UserID" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+
+  /users:
+    get:
+      tags: ["User"]
+      summary: Get list of all users
+      description: |-
+        Get the list of all the users with they properties
+      operationId: getAllUsers
+      parameters:
+        - name: username
+          in: query
+          required: false
+          description: Username for finding user
+          schema: { $ref: "#/components/schemas/Username" }
+      responses:
+        "200":
+          description: |-
+            Array of object user returned
+          content:
+            application/json:
+              schema:
+                description: |-
+                  Array of obj type User
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+                minItems: 0
+                maxItems: 9999
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+
+
+
+  /users/{userID}:
+    parameters:
+      - $ref: '#/components/parameters/userID'
+    get:
+      tags: ["User"]
+      summary: Get a specific user
+      operationId: getUserProfile
+      description: |-
+        Get the user with the give ID
+      responses:
+        "200":
+          description: |-
+            Request accepted, user finded
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/UserProfile'
+                  
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "403": { $ref: "#/components/responses/UserBanned" }
+        "404": { $ref: "#/components/responses/UserNotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+    put:
+      tags: ["User"]
+      summary: Change username
+      description: |-
+        Change the username of the specific User
+      operationId: setMyUserName
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Username'
+      responses:
+        "204":
+          description: |-
+            Username saved successfully
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/UserNotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+    delete:
+      tags: ["User"]
+      summary: Delete user
+      description: |-
+        Delete a user
+      operationId: deleteUser
+      responses:
+        "204":
+          description: |-
+            User deleted successfully
+          
+  /users/{userID}/follow/{fUserID}:
+    parameters:
+      - $ref: '#/components/parameters/userID'
+      - $ref: '#/components/parameters/fUserID'
+    put:
+      tags: ["Follow"]
+      summary: Follow a specific User
+      description: |-
+        Add a user to the follower list
+      operationId: followUser
+      responses:
+        "204":
+          description: |-
+            User followed successfully
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "403": { $ref: "#/components/responses/UserBanned" }
+        "404": { $ref: "#/components/responses/UserNotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+          
+    delete:
+      tags: ["Follow"]
+      summary: Unfollow a specific UserID
+      operationId: unfollowUser
+      description: |-
+        Remove a user from the follower list
+      responses:
+        "204":
+          description: |-
+            User unfollowed successfully
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/UserNotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+          
+  /users/{userID}/ban/{bUserID}:
+    parameters:
+      - $ref: '#/components/parameters/userID'
+      - $ref: '#/components/parameters/bUserID'
+    put:
+      tags: ["Ban"]
+      summary: Ban a specific User
+      description: |-
+        Add a user to the ban list
+      operationId: banUser
+      responses:
+        "204":
+          description: |-
+            User banned successfully
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/UserNotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+          
+    delete:
+      tags: ["Ban"]
+      summary: Unban a specific User
+      operationId: unbanUser
+      description: |-
+        Remove a user from the ban list
+      responses:
+        "204":
+          description: |-
+            User un-banned successfully
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/UserNotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+        
+  /users/{userID}/home:
+    parameters:
+      - $ref: '#/components/parameters/userID'
+    get:
+      tags: ["Photo"]
+      summary: Get a user's home
+      description: |-
+        Get the photos stream of a user
+      operationId: getMyStream
+      responses:
+        "200":
+          description: |-
+            Request accepted, photos finded
+          content:
+            application/json:
+              schema:
+                description: |-
+                  obj with arrays of followers and photo
+                type: object
+                properties:
+                  followers:
+                    description: |-
+                      Array of obj type User
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                    minItems: 0
+                    maxItems: 9999
+                  posts:
+                    description: |-
+                      Array of obj type Photo
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Photo'
+                    minItems: 0
+                    maxItems: 9999
+        "404": { $ref: "#/components/responses/UserNotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+          
+  /users/{userID}/photos:
+    parameters:
+      - $ref: '#/components/parameters/userID'
+    post:
+      tags: ["Photo"]
+      summary: Add a photo
+      description: |-
+        Upload a photo
+      operationId: uploadPhoto
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/photoData'
+      responses:
+        "201":
+          description: |-
+            Photo uploaded successfully
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/PhotoID'
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/UserNotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+        
+  /users/{userID}/photos/{photoID}:
+    parameters:
+      - $ref: '#/components/parameters/userID'
+      - $ref: '#/components/parameters/photoID'
+    get:
+      tags: ["Photo"]
+      summary: Get image of the post
+      description: |-
+        Get the raw image of the post
+      operationId: getPhoto
+      responses:
+        "200":
+          description: |-
+            Request accepted, image finded
+          content:
+            application/json:
+              schema:
+                description: |-
+                  binary data of the photo
+                type: object
+                properties:
+                  file:
+                    $ref: '#/components/schemas/rawData'
+    delete:
+      tags: ["Photo"]
+      summary: Delete a photo
+      operationId: deletePhoto
+      description: |-
+        Delete a photo from a user stream
+      responses:
+        "204":
+          description: |-
+            Photo deleted successfully
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/UserNotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+          
+  /users/{userID}/photos/{photoID}/like/{likeID}:
+    parameters:
+      - $ref: '#/components/parameters/userID'
+      - $ref: '#/components/parameters/photoID'
+      - $ref: '#/components/parameters/likeID'
+    put:
+      tags: ["Photo"]
+      summary: Like a photo
+      description: |-
+        Add like on a photo
+      operationId: likePhoto
+      responses:
+        "204":
+          description: |-
+            Photo liked successfully
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+    delete:
+      tags: ["Photo"]
+      summary: Remove like in a photo
+      description: |-
+        Remove like from a photo
+      operationId: unlikePhoto
+      responses:
+        "204":
+          description: |-
+            Like removed successfully
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+        
+  /users/{userID}/photos/{photoID}/comments:
+    parameters:
+      - $ref: '#/components/parameters/userID'
+      - $ref: '#/components/parameters/photoID'
+    post:
+      tags: ["Photo"]
+      summary: Comment a photo
+      description: |-
+        Add a comment to a photo
+      operationId: commentPhoto
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentText'
+      responses:
+        "201":
+          description: |-
+            Comment added successfully
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/CommentID'
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+        
+  /users/{userID}/photos/{photoID}/comments/{commentID}:
+    parameters:
+      - $ref: '#/components/parameters/userID'
+      - $ref: '#/components/parameters/photoID'
+      - $ref: '#/components/parameters/commentID'
+    delete:
+      tags: ["Photo"]
+      summary: Remove comment from a photo
+      operationId: uncommentPhoto
+      description: |-
+        Remove comment from a photo
+      responses:
+        "204":
+          description: |-
+            Comment removed successfully
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+          
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: integer
+      
+  schemas:
+    User:
+      title: User
+      description: |-
+        This object represent a single User
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UserID'
+        username:
+          $ref: '#/components/schemas/Username'
+          
+    UserProfile:
+      title: UserProfile
+      description: |-
+        This object represent a single User Profile
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UserID'
+        username:
+          $ref: '#/components/schemas/Username'
+        followers:
+          description: |-
+            Array of obj type User
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+          minItems: 0
+          maxItems: 9999
+        following:
+          description: |-
+            Array of obj type User
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+          minItems: 0
+          maxItems: 9999
+        posts:
+          description: |-
+            Array of obj type Photo
+          type: array
+          items:
+            $ref: '#/components/schemas/Photo'
+          minItems: 0
+          maxItems: 9999
+        isBanned:
+          description: |-
+            Is User banned, bool type
+          type: boolean
+    Photo:
+      title: Photo schema
+      description: |-
+        This object represent a single Photo
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/PhotoID'
+        created_datetime:
+          description: |-
+            date of creation
+          type: string
+          example: "2023-03-19 14:59:29"
+          pattern: ^[0-9]{4}-[0-9]{2}-[0-9]{2}\s(0?[0-9]|1[0-9]|2[0-3]):[0-9]+:(0?[0-9]|[1-5][0-9])$
+          minLength: 3
+          maxLength: 20
+        media_file:
+          description: |-
+            path where file is saved
+          type: string
+          example: "/Screenshot_2023-01-11_23-59-50.png"
+          pattern: ^\/[A-Za-z0-9_-]+\.[A-Za-z]
+          minLength: 3
+          maxLength: 155
+        user_id:
+          $ref: '#/components/schemas/UserID'
+        caption:
+          description: |-
+            Photo's caption
+          type: string
+          example: "Wow"
+          pattern: ^[ A-Za-z0-9_@.\/#!&+-]*$
+          minLength: 3
+          maxLength: 155
+        likes:
+          description: |-
+            Photo's like
+          type: array
+          minItems: 0
+          maxItems: 999999
+          items:
+            $ref: '#/components/schemas/Like'
+        comments:
+          description: |-
+            Photo's comments
+          type: array
+          minItems: 0
+          maxItems: 999999
+          items:
+            $ref: '#/components/schemas/Comment'
+            
+    Username:
+      description: |-
+        string of username
+      type: string
+      example: "Giorgio"
+      pattern: ^(?=.{3,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$
+      minLength: 3
+      maxLength: 25
+            
+    photoData:
+      description: |-
+        binary data of the photo
+      type: object
+      properties:
+        file:
+          $ref: '#/components/schemas/rawData'
+        caption:
+          description: |-
+            Photo's caption
+          type: string
+          example: "Wow"
+          pattern: ^[ A-Za-z0-9_@.\/#!&+-]*$
+          minLength: 3
+          maxLength: 155
+        fileName:
+          description: |-
+            name of the photo
+          type: string
+          example: "Screenshot_2023-01-11_23-59-50.png"
+          pattern: ^[A-Za-z0-9_-]+\.[A-Za-z]
+          minLength: 3
+          maxLength: 155
+          
+    rawData:
+      description: |-
+        Photo's binary data
+      type: string
+      format: binary
+      minLength: 0
+      maxLength: 999999
+
+    Like:
+      title: Like obj
+      description: |-
+        This object represent a single Like
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/LikeID'
+        user_id:
+          $ref: '#/components/schemas/UserID'
+        username:
+          $ref: '#/components/schemas/Username'
+        post_id:
+           $ref: '#/components/schemas/PhotoID'
+            
+    Comment:
+      title: Comment obj
+      description: |-
+        This object represent a single Comment
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/LikeID'
+        text:
+          $ref: '#/components/schemas/CommentText'
+        username:
+          $ref: '#/components/schemas/Username'
+        user_id:
+          $ref: '#/components/schemas/UserID'
+        post_id:
+           $ref: '#/components/schemas/PhotoID'
+           
+    CommentText:
+      title: Comment text
+      description: |-
+        Text of a comment
+      type: string
+      example: "Che bella foto! WOW"
+      pattern: ^[ A-Za-z0-9_@.\/#!&+-]*$
+      minLength: 3
+      maxLength: 255
+              
+    UserID:
+      description: |-
+        User identifier
+      type: integer
+      minimum: 1
+      maximum: 9999999
+      example: 1285592
+      readOnly: true
+      
+    PhotoID:
+      description: |-
+        Photo identifier
+      type: integer
+      minimum: 1
+      maximum: 9999999
+      example: 1285592
+      readOnly: true
+      
+    CommentID:
+      description: |-
+        Comment identifier
+      type: integer
+      minimum: 1
+      maximum: 9999999
+      example: 1285592
+      readOnly: true
+      
+    LikeID:
+      description: |-
+        Like identifier
+      type: integer
+      minimum: 1
+      maximum: 9999999
+      example: 1285592
+      readOnly: true
+  
+  parameters:
+    userID:
+      in: path
+      required: true
+      description: |-
+        User identifier
+      name: userID
+      schema:
+        $ref: '#/components/schemas/UserID'
+      
+    photoID:
+      in: path
+      required: true
+      description: |-
+        Photo identifier
+      name: photoID
+      schema:
+        $ref: '#/components/schemas/PhotoID'
+        
+    bUserID:
+      in: path
+      required: true
+      description: |-
+        User identifier for ban/unban
+      name: bUserID
+      schema:
+        $ref: '#/components/schemas/UserID'
+    
+    fUserID:
+      in: path
+      required: true
+      description: |-
+        User identifier for follow/unfollow
+      name: fUserID
+      schema:
+        $ref: '#/components/schemas/UserID'
+    
+    commentID:
+      in: path
+      required: true
+      description: |-
+        Comment identifier
+      name: commentID
+      schema:
+        $ref: '#/components/schemas/CommentID'
+        
+    likeID:
+      in: path
+      required: true
+      description: |-
+        Like identifier
+      name: likeID
+      schema:
+        $ref: '#/components/schemas/LikeID'
+
+  responses:
+    UserNotFound:
+      description: |-
+        The user requested has not been found.
+    UserBanned:
+      description: |-
+        The user requested has banned you.
+    BadRequest:
+      description: |-
+        The request was not compliant with the documentation (missing fields, etc)
+    InternalServerError:
+      description: |-
+        The server encountered an internal error
+       
+security:
+  - bearerAuth: []

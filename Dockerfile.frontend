@@ -1,0 +1,10 @@
+# docker build -t homework-frontend:latest -f Dockerfile.frontend .
+# docker run -it -p 8080:80 --rm homework-frontend:latest
+FROM node:lts as builder
+WORKDIR /src/
+COPY webui webui
+WORKDIR /src/webui
+RUN npm run build-prod
+
+FROM nginx:1.23.3
+COPY --from=builder /src/webui/dist /usr/share/nginx/html
