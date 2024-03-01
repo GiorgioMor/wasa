@@ -44,10 +44,10 @@ This repository contains the `webui/node_modules` directory with all dependencie
 You can build and run the project with Docker
 
 * Backend
-	```shell
-	docker build -t homework-backend:latest -f Dockerfile.backend .
-	docker run -it -p 3000:3000 --rm homework-backend:latest
-	```
+```shell
+docker build -t homework-backend:latest -f Dockerfile.backend .
+docker run -it -p 3000:3000 --rm homework-backend:latest
+```
 
 * Frontend
 ```shell
