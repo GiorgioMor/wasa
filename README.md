@@ -86,34 +86,21 @@ If you want to launch the WebUI, open a new tab and launch:
 npm run dev
 ```
 
-## Known issues
+## Docker
 
-### Apple M1 / ARM: `failed to load config from`...
+You can build and run the project with Docker
 
-If you use Apple M1/M2 hardware, or other ARM CPUs, you may encounter an error message saying that `esbuild` (or some other tool) has been built for another platform.
+* Backend
+	```shell
+		docker build -t homework-backend:latest -f Dockerfile.backend .
+		docker run -it -p 3000:3000 --rm homework-backend:latest
+	```
 
-If so, you can fix issuing these commands **only the first time**:
-
-```shell
-./open-npm.sh
-# (here you're inside the NPM container)
-npm install
-exit
-# Now you can continue as indicated in "How to build/run"
-```
-
-**Use these instructions only if you get an error. Do not use it if your build is OK**.
-
-### My build works when I use `npm run dev`, however there is a Javascript crash in production/grading
-
-Some errors in the code are somehow not shown in `vite` development mode. To preview the code that will be used in production/grading settings, use the following commands:
-
-```shell
-./open-npm.sh
-# (here you're inside the NPM container)
-npm run build-prod
-npm run preview
-```
+* Frontend
+	```shell
+ 		docker build -t homework-frontend:latest -f Dockerfile.frontend .
+ 		docker run -it -p 8080:80 --rm homework-frontend:latest
+	```
 
 ## License
 
